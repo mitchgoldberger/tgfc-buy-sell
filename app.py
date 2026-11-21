@@ -25,6 +25,7 @@ NAVY = "#1A1F4B"
 TINT = "#EEF0F7"
 GREEN = "#1F7A4D"
 RED = "#B42318"
+FREIGHT_DESK_URL = "https://tgfc-freight-desk.streamlit.app"
 
 st.markdown(
     f"""
@@ -34,7 +35,11 @@ st.markdown(
 .bs-top .mark {{ background:#fff; color:{NAVY}; font-weight:800; font-size:11px; border-radius:7px; padding:8px 7px; letter-spacing:.02em; }}
 .bs-top h1 {{ font-size:18px; margin:0; color:#fff; font-weight:600; }}
 .bs-top small {{ display:block; font-size:12px; opacity:.75; }}
-.bs-top .who {{ margin-left:auto; font-size:12px; opacity:.9; text-align:right; }}
+.bs-top .right {{ margin-left:auto; display:flex; align-items:center; gap:14px; }}
+.bs-top .who {{ font-size:12px; opacity:.9; text-align:right; }}
+.bs-top .switch {{ background:#fff; color:{NAVY} !important; text-decoration:none !important; font-size:12px; font-weight:700;
+        border-radius:7px; padding:6px 11px; white-space:nowrap; }}
+.bs-top .switch:hover {{ background:{TINT}; }}
 .sec {{ font-size:12px; font-weight:700; color:{NAVY}; letter-spacing:.08em; text-transform:uppercase;
         border-bottom:2px solid {NAVY}; padding-bottom:3px; margin:14px 0 8px; }}
 .lock {{ font-size:12px; color:#5A5F78; background:#F6F6F8; border:1px dashed #C8CBD8; border-radius:8px; padding:6px 10px; }}
@@ -192,8 +197,9 @@ def top_bar(sub: str, u=None, buy=False):
     if u:
         access = "Full access" if buy else "Sale side only"
         who = f'<span class="who">{esc(u["name"])}<br>{access}</span>'
+    switch = f'<a class="switch" href="{FREIGHT_DESK_URL}" target="_blank" title="Open the Freight Desk">🚚 Freight Desk</a>'
     st.markdown(f'<div class="bs-top"><span class="mark">TGFC</span><div><h1>Buy / Sell</h1>'
-                f'<small>{esc(sub)}</small></div>{who}</div>', unsafe_allow_html=True)
+                f'<small>{esc(sub)}</small></div><div class="right">{who}{switch}</div></div>', unsafe_allow_html=True)
 
 
 def login_screen():
@@ -670,6 +676,10 @@ def main():
                  "If it's the free Supabase database, it may be paused: resume it in Supabase.")
         st.caption(str(e))
         st.stop()
+    if not db.IS_PG:
+        st.warning("Not connected to the shared database: the app can't find DATABASE_URL in its secrets, so it's using "
+                   "a temporary test database. Freight Desk sign-ins won't work here and anything saved will be lost. "
+                   "Add DATABASE_URL (the same one as the Freight Desk) under the app's Settings → Secrets.")
 
     u = current_user()
     if not u:
