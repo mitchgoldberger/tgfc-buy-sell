@@ -8,6 +8,8 @@ those figures are never sent to their screen, their Excel or their emails.
 """
 from __future__ import annotations
 
+import base64
+import os
 import urllib.parse
 from datetime import date, datetime, timezone
 
@@ -27,11 +29,26 @@ GREEN = "#1F7A4D"
 RED = "#B42318"
 FREIGHT_DESK_URL = "https://tgfc-freight-desk.streamlit.app"
 
+
+def _logo_tag() -> str:
+    """The TGFC logo in white, for the navy top bar. Falls back to the text mark if the file is missing."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo_white.png")
+    try:
+        with open(path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        return f'<img class="logo" src="data:image/png;base64,{b64}" alt="Third Generation Food Company">'
+    except Exception:
+        return '<span class="mark">TGFC</span>'
+
+
+LOGO_TAG = _logo_tag()
+
 st.markdown(
     f"""
 <style>
 .block-container {{ padding-top: 1.2rem; max-width: 1180px; }}
 .bs-top {{ background:{NAVY}; color:#fff; border-radius:10px; padding:12px 18px; display:flex; align-items:center; gap:14px; margin-bottom:14px; }}
+.bs-top .logo {{ height:46px; width:auto; display:block; }}
 .bs-top .mark {{ background:#fff; color:{NAVY}; font-weight:800; font-size:11px; border-radius:7px; padding:8px 7px; letter-spacing:.02em; }}
 .bs-top h1 {{ font-size:18px; margin:0; color:#fff; font-weight:600; }}
 .bs-top small {{ display:block; font-size:12px; opacity:.75; }}
@@ -198,7 +215,7 @@ def top_bar(sub: str, u=None, buy=False):
         access = "Full access" if buy else "Sale side only"
         who = f'<span class="who">{esc(u["name"])}<br>{access}</span>'
     switch = f'<a class="switch" href="{FREIGHT_DESK_URL}" target="_blank" title="Open the Freight Desk">🚚 Freight Desk</a>'
-    st.markdown(f'<div class="bs-top"><span class="mark">TGFC</span><div><h1>Buy / Sell</h1>'
+    st.markdown(f'<div class="bs-top">{LOGO_TAG}<div><h1>Buy / Sell</h1>'
                 f'<small>{esc(sub)}</small></div><div class="right">{who}{switch}</div></div>', unsafe_allow_html=True)
 
 
